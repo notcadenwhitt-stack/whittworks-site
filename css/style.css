@@ -1,17 +1,20 @@
-/* WhittWorks Studios — the cork board
-   Marker: Permanent Marker | Hand: Caveat | Typed: Special Elite | Meta: Space Mono
-   Paper: real photographed/scanned assets in ../assets/paper/ (see SOURCES.md)
+/* WhittWorks Studios — print-poster editorial
+   Display: Anton | Mono: Space Mono | Body: Inter
+   Paper #EFEDE6 · Ink #141412 · Stamp red #C8331B
 ------------------------------------------------------------------ */
 
 :root {
-  --ink: #191919;
-  --red: #b3271c;
-  --card: #fbf8f1;
+  --paper: #EFEDE6;
+  --ink: #141412;
+  --red: #C8331B;
+  --rule: rgba(20, 20, 18, 0.28);
+  --muted: rgba(20, 20, 18, 0.62);
 
-  --marker: "Permanent Marker", cursive;
-  --hand: "Caveat", cursive;
-  --typed: "Special Elite", monospace;
-  --mono: "Space Mono", ui-monospace, Menlo, monospace;
+  --display: "Anton", "Arial Narrow", Impact, sans-serif;
+  --mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --pad: clamp(1rem, 3.2vw, 3rem);
 }
 
 *,
@@ -22,805 +25,386 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: #2b2119;
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--typed);
+  font-family: var(--body);
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.55;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 img { display: block; max-width: 100%; height: auto; }
-h1, h2, p, figure { margin: 0; }
-ul { margin: 0; padding: 0; list-style: none; }
+
+h1, h2, h3, p, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+
 a { color: inherit; }
 
-:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
 
-/* invisible scroll runway that drives the camera */
-.scroll-space { height: 1300vh; }
-
-/* --- fixed overlay chrome ---------------------------------------- */
-
-.deskbar {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-0.4deg);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0.55rem 1.1rem;
-  background: #f4efe2;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.deskbar-name {
+.skip-link {
+  position: absolute;
+  left: var(--pad);
+  top: -100px;
+  z-index: 10;
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--mono);
-  font-weight: 700;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-}
-
-.deskbar ul { display: flex; gap: 1.1rem; }
-
-.deskbar a {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  padding: 0.6rem 1rem;
   text-decoration: none;
 }
-.deskbar a:hover { color: var(--red); }
+.skip-link:focus { top: 0.75rem; }
 
-/* small screens: the bar's desktop metrics (455.9px) outrun a phone
-   viewport, so below tablet width we tighten padding/gap/type and let
-   the bar size itself to the viewport instead of overflowing it. desktop
-   (>=900px, well above this query) is untouched. */
-@media (max-width: 700px) {
-  .deskbar {
-    top: 10px;
-    gap: 0.6rem;
-    padding: 0.4rem 0.55rem;
-    max-width: calc(100vw - 20px);
-  }
+/* --- mono metadata ------------------------------------------------ */
 
-  .deskbar-name {
-    font-size: 0.5rem;
-    letter-spacing: 0.06em;
-  }
-
-  .deskbar ul { gap: 0.5rem; }
-
-  .deskbar a {
-    font-size: 0.5rem;
-    letter-spacing: 0.06em;
-    display: inline-block;
-    padding: 0.55rem 0.05rem;
-  }
-}
-
-.scroll-hint {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%) rotate(0.5deg);
-  z-index: 50;
+.meta {
   font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
+  font-size: clamp(0.62rem, 0.55rem + 0.2vw, 0.75rem);
+  line-height: 1.4;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #f4efe2;
-  background: rgba(25, 19, 12, 0.55);
-  padding: 0.4rem 0.9rem;
-  border-radius: 2px;
-  transition: opacity 0.4s;
-  pointer-events: none;
-}
-.scroll-hint.faded { opacity: 0; }
-
-/* --- the room and the board --------------------------------------- */
-
-.viewport {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  background:
-    /* soft warm spotlight falling on the wall behind the board */
-    radial-gradient(95% 75% at 50% 38%, rgba(255, 226, 180, 0.11), transparent 65%),
-    /* faint drywall texture */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.42 0 0 0 0 0.34 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23w)'/%3E%3C/svg%3E"),
-    linear-gradient(180deg, #372b1f 0%, #2b2118 55%, #201811 100%);
-}
-
-/* darkened room corners + fine photographic grain over the whole scene */
-.viewport::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"),
-    radial-gradient(120% 100% at 50% 42%, transparent 55%, rgba(12, 6, 2, 0.42) 100%);
-}
-
-.board {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3600px;
-  height: 2400px;
-  transform-origin: 0 0;
-  will-change: transform;
-  /* real walnut frame */
-  border: 30px solid transparent;
-  border-image: url("../assets/wood.jpg") 170 / 30px round;
-  box-shadow:
-    /* cork sits recessed behind the frame lip */
-    inset 0 3px 0 rgba(255, 230, 190, 0.14),
-    inset 0 22px 50px rgba(35, 18, 6, 0.55),
-    inset 0 -12px 34px rgba(35, 18, 6, 0.35),
-    inset 14px 0 34px rgba(35, 18, 6, 0.3),
-    inset -14px 0 34px rgba(35, 18, 6, 0.3),
-    /* frame casts onto the wall, light from upper left */
-    10px 34px 90px rgba(0, 0, 0, 0.62),
-    3px 8px 22px rgba(0, 0, 0, 0.5);
-  background-color: #a87f4e;
-  /* real photographed cork. the same scan twice at sizes with no common
-     period inside the board (1180 and 890 only line up again at 105,020px),
-     so there is no repeat to find. lighting is a lamp high on the left, not
-     a symmetric vignette: one warm pool off-centre, two unequal dark pools. */
-  background-image:
-    /* the key light is across the room, not a lamp a metre off the board:
-       broad enough that there is no hotspot to locate, which is what makes
-       the parallel shadows below read as one distant source */
-    radial-gradient(140% 120% at 36% 24%, rgba(255, 240, 210, 0.22), rgba(128, 110, 90, 0) 72%),
-    radial-gradient(90% 80% at 78% 96%, rgba(50, 28, 10, 0.5), rgba(128, 110, 90, 0) 62%),
-    radial-gradient(115% 95% at 2% 86%, rgba(45, 26, 10, 0.42), rgba(128, 110, 90, 0) 64%),
-    url("../assets/cork.jpg"),
-    url("../assets/cork.jpg");
-  background-position: 0 0, 0 0, 0 0, 380px 610px, 0 0;
-  background-size: auto, auto, auto, 890px 890px, 1180px 1180px;
-  background-blend-mode: soft-light, multiply, multiply, soft-light, normal;
-}
-
-/* --- red string + pins -------------------------------------------- */
-
-.strings {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 6;
-  filter: drop-shadow(6px 11px 5px rgba(25, 8, 2, 0.38));
-}
-
-/* two-ply yarn: dark core with a lit strand over it */
-.strings .string-core {
-  fill: none;
-  stroke: #8f1d10;
-  stroke-width: 4.5;
-  stroke-linecap: round;
-}
-.strings .string-hi {
-  fill: none;
-  stroke: #c93a24;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-}
-
-.pin {
-  position: absolute;
-  z-index: 7;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #ff9583 4%, #e6402c 32%, #c0230f 58%, #6f0f03 100%);
-  box-shadow:
-    3px 8px 10px rgba(20, 5, 0, 0.5),
-    1px 3px 4px rgba(20, 5, 0, 0.45),
-    inset -2px -4px 6px rgba(70, 4, 0, 0.6),
-    inset 2px 3px 4px rgba(255, 190, 170, 0.5);
-}
-.pin::before {
-  /* specular glint on the plastic dome */
-  content: "";
-  position: absolute;
-  left: 25%;
-  top: 18%;
-  width: 9px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  filter: blur(1px);
-  transform: rotate(-25deg);
-}
-.pin::after {
-  content: "";
-  position: absolute;
-  left: 58%;
-  top: 96%;
-  width: 20px;
-  height: 8px;
-  transform: translateX(-50%);
-  background: rgba(25, 8, 2, 0.4);
-  border-radius: 50%;
-  filter: blur(3px);
-}
-
-/* stray pinholes from whatever hung here before */
-.hole {
-  position: absolute;
-  z-index: 2;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #3a2410, #1f1206 70%);
-  box-shadow: 0 1.5px 1px rgba(255, 230, 190, 0.28);
-}
-
-/* --- shared paper physics ----------------------------------------- */
-
-.card, .sticky, .polaroid, .postcard {
-  position: absolute;
-  z-index: 3;
-  transform: rotate(var(--rot, 0deg));
-}
-
-/* --- ink: every piece of writing trembles a little ------------------ */
-
-/* per-character jitter set by js/hand.js.
-   .wd keeps each word atomic so lines still break only at spaces. */
-.jit { display: inline; }
-.wd { display: inline-block; white-space: nowrap; }
-.ch {
-  display: inline-block;
-  white-space: pre;
-  transform: rotate(var(--r, 0deg)) translateY(var(--y, 0)) scale(var(--s, 1));
-  font-variation-settings: "wght" var(--w, 500);
-  opacity: var(--o, 1);
-}
-
-.sticky-title, .sticky-note { filter: url(#ink-a); }
-.polaroid figcaption { filter: url(#ink-b); }
-.pc-head, .pc-msg, .pc-msg-small, .email-link, .marker { filter: url(#ink-c); }
-.typed { filter: url(#ink-t); }
-
-/* --- index cards (real 5x3 proportions) ---------------------------- */
-
-.index-card {
-  width: 720px;
-  height: 432px;
-  padding: 62px 40px 26px;
-  overflow: hidden;
-  background:
-    /* real scanned paper fiber, remapped high-key so it multiplies onto
-       the near-white stock instead of cancelling out in soft-light */
-    url("../assets/paper/paper-grain-hi.webp") 0 0 / 300px,
-    /* faint paper grain */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.32 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E"),
-    /* blue rules, edge to edge. a printed rule is ink soaking sideways into
-       the fiber, not a 1px hairline: soft shoulders either side of the core
-       so the line survives the card's rotation without stair-stepping.
-       origin 53px puts the core 1.6px under the typed baselines (82 + 32k),
-       which is where a typist lands on ruled stock. */
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 29.6px,
-      rgba(96, 130, 178, 0.10) 29.6px 30.2px,
-      rgba(96, 130, 178, 0.28) 30.2px 31px,
-      rgba(96, 130, 178, 0.10) 31px 31.6px,
-      transparent 31.6px 32px
-    ) 0 53px / 100% calc(100% - 53px) no-repeat,
-    /* single red header line */
-    linear-gradient(rgba(205, 92, 92, 0.75), rgba(205, 92, 92, 0.75)) 0 52px / 100% 1.5px no-repeat,
-    /* soft top-light on the paper itself */
-    linear-gradient(172deg, #faf8f0 0%, #f5f2e7 60%, #efebdd 100%);
-  background-blend-mode: multiply, normal, normal, normal, normal;
-  /* guillotined stock: corners are never equal and the edge is never straight.
-     #cut displaces the silhouette, so the shadows have to be drop-shadow()
-     to follow it instead of tracing the undisplaced box. */
-  border-radius: 3px 7px 4px 6px;
-  filter:
-    url(#cut)
-    /* contact occlusion: the seam where the sheet touches whatever is under
-       it. zero offset, so it rings the whole silhouette and reads at rest */
-    drop-shadow(0 0 4px rgba(25, 12, 4, 0.42))
-    drop-shadow(1px 1px 2px rgba(25, 12, 4, 0.3))
-    drop-shadow(3px 7px 12px rgba(25, 12, 4, 0.28))
-    drop-shadow(8px 22px 38px rgba(25, 12, 4, 0.24));
-}
-.index-card::after {
-  /* faint corner curl shading */
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, transparent 82%, rgba(60, 40, 15, 0.06) 100%);
-}
-
-.typed {
-  font-family: var(--typed);
-  font-size: 20px;
-  line-height: 32px;
-  color: #2b2115;
-}
-.typed + .typed { margin-top: 32px; }
-.typed.small { font-size: 13px; line-height: 22px; color: #55503f; }
-.card-head { letter-spacing: 0.2em; color: #9c3a2e; }
-
-.title-card {
-  width: 800px;
-  height: 480px;
-  text-align: center;
-  padding-top: 92px;
-}
-
-.marker {
-  font-family: var(--marker);
-  font-weight: 400;
-  font-size: 88px;
-  line-height: 1.04;
-  letter-spacing: 0.01em;
-  color: #0e0c0a;
-}
-
-.title-card .typed.small { margin-top: 38px; }
-
-.about-card { width: 720px; }
-
-.quote-card { width: 700px; height: 420px; }
-.attr { margin-top: 32px; }
-
-/* --- sticky notes: real photographed paper -------------------------- */
-
-.sticky {
-  /* NOTE: % padding on abs-positioned elements resolves against the 3600px
-     board, so writable-area insets are computed from --sz instead */
-  --sz: 344px;
-  width: var(--sz);
-  padding:
-    calc(var(--pt) * var(--sz))
-    calc(var(--pr) * var(--sz))
-    calc(var(--pb) * var(--sz))
-    calc(var(--pl) * var(--sz));
-  background: none;
-  box-shadow: none;
-}
-.sticky::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--paper) center / 100% 100% no-repeat;
-  filter:
-    drop-shadow(0 0 3px rgba(28, 15, 5, 0.5))
-    drop-shadow(0 1px 1px rgba(25, 12, 4, 0.3))
-    drop-shadow(3px 8px 8px rgba(25, 12, 4, 0.2))
-    drop-shadow(8px 18px 20px rgba(22, 9, 2, 0.24))
-    /* glued along the top strip only, so the bottom of the note stands off
-       the cork and throws a long shadow the top edge never does */
-    drop-shadow(4px 26px 22px rgba(22, 9, 2, 0.26));
-}
-.sticky.flip::before { transform: scaleX(-1); }
-/* the sheet's own fiber reads back over the ink, so the pen sits in the
-   paper instead of floating on it. masked to the photographed silhouette so
-   nothing spills onto the cork at the torn edges. */
-.sticky::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    /* the lifted bottom edge catches the light bouncing back off the cork */
-    linear-gradient(to bottom, transparent 78%, rgba(255, 250, 228, 0.5)),
-    url("../assets/paper/paper-grain.webp") 0 0 / 170px;
-  -webkit-mask: var(--paper) center / 100% 100% no-repeat;
-  mask: var(--paper) center / 100% 100% no-repeat;
-  mix-blend-mode: overlay;
-  opacity: 0.3;
-}
-.sticky.flip::after { transform: scaleX(-1); }
-
-/* each variant is a different physical note: aspect from the photo,
-   writable-area insets from its measured safe zone (fractions of width) */
-.paper-1 { --paper: url("../assets/paper/sticky-01.webp"); aspect-ratio: 1013/989; --pt: 0.07;  --pr: 0.05; --pb: 0.15; --pl: 0.055; }
-.paper-2 { --paper: url("../assets/paper/sticky-02.webp"); aspect-ratio: 1009/983; --pt: 0.07;  --pr: 0.05; --pb: 0.15; --pl: 0.06; }
-.paper-3 { --paper: url("../assets/paper/sticky-03.webp"); aspect-ratio: 1029/982; --pt: 0.07;  --pr: 0.06; --pb: 0.16; --pl: 0.06; }
-.paper-4 { --paper: url("../assets/paper/sticky-04.webp"); aspect-ratio: 294/284;  --pt: 0.06;  --pr: 0.06; --pb: 0.10; --pl: 0.06; }
-.paper-5 { --paper: url("../assets/paper/sticky-05.webp"); aspect-ratio: 539/533;  --pt: 0.05;  --pr: 0.05; --pb: 0.12; --pl: 0.07; }
-.paper-6 { --paper: url("../assets/paper/sticky-06.webp"); aspect-ratio: 293/292;  --pt: 0.07;  --pr: 0.07; --pb: 0.09; --pl: 0.07; }
-.paper-7 { --paper: url("../assets/paper/sticky-07.webp"); aspect-ratio: 359/358;  --pt: 0.06;  --pr: 0.06; --pb: 0.09; --pl: 0.06; }
-
-/* color modifiers: same photographed scan, hue-shifted in HSV so paper
-   texture, lighting gradients, and curl shadows all survive. additive to
-   .paper-N so shared classes (paper-2, paper-3) can serve differently
-   colored elements without touching the unmodified default. */
-.paper-1.c-blue  { --paper: url("../assets/paper/sticky-01-blue.webp"); }
-.paper-2.c-blue  { --paper: url("../assets/paper/sticky-02-blue.webp"); }
-.paper-3.c-blue  { --paper: url("../assets/paper/sticky-03-blue.webp"); }
-.paper-3.c-green { --paper: url("../assets/paper/sticky-03-green.webp"); }
-.paper-5.c-pink  { --paper: url("../assets/paper/sticky-05-pink.webp"); }
-.paper-6.c-green { --paper: url("../assets/paper/sticky-06-green.webp"); }
-
-.hand {
-  font-family: var(--hand);
-  /* ballpoint on absorbent stock is never true black, and it never fully
-     hides the sheet: a little of the fiber under the stroke reads through,
-     which is what stops the writing looking printed on top of the paper */
-  color: rgba(36, 33, 28, 0.87);
-}
-
-.sticky-title {
-  font-size: 34px;
-  line-height: 1.05;
-  font-weight: 700;
-}
-.sticky-note {
-  margin-top: 14px;
-  font-size: 26px;
-  line-height: 1.15;
-  font-weight: 400;
-}
-
-.mini-sticky {
-  --sz: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.mini-sticky .sticky-note { font-size: 30px; margin: 0; }
-
-.doodle {
-  --sz: 280px;
-  --pt: 0.13;
-  --pr: 0.12;
-  --pb: 0.16;
-  --pl: 0.12;
-}
-
-.ink {
-  width: 100%;
-  height: auto;
-  /* hand wobble on every stroke */
-  filter: url(#roughen);
-}
-.ink path, .ink circle {
-  fill: none;
-  /* same slightly open ink as the handwriting, so the sticky's tooth reads
-     through the stroke instead of the stroke sitting on top of it */
-  stroke: rgba(26, 24, 20, 0.9);
-  /* one nib, but pressure is never constant: shapes that enclose something
-     get gone over and carry more ink than the detail drawn inside them.
-     per-path via --sw. */
-  stroke-width: var(--sw, 3.2);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-/* quick tick strokes stop dead; they do not roll off into a round cap */
-.ink .tick { stroke-linecap: butt; }
-.ink-label {
-  font-family: var(--hand);
-  font-size: 30px;
-  font-weight: 700;
-  fill: rgba(26, 24, 20, 0.9);
-  stroke: none;
-}
-
-/* --- polaroids: real scanned instant-film frames -------------------- */
-
-.polaroid {
-  width: 364px;
-  aspect-ratio: var(--fw) / var(--fh);
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none;
-  filter:
-    drop-shadow(0 0 4px rgba(28, 15, 5, 0.5))
-    drop-shadow(1px 2px 2px rgba(25, 12, 4, 0.32))
-    drop-shadow(5px 12px 14px rgba(25, 12, 4, 0.26))
-    drop-shadow(11px 26px 28px rgba(22, 9, 2, 0.3));
-}
-.frame-1 {
-  --fw: 950; --fh: 1149;
-  --wx: 6.21; --wy: 5.74; --ww: 87.26; --wh: 73.63;
-  --frame: url("../assets/paper/polaroid-frame-1.webp");
-}
-.frame-2 {
-  --fw: 950; --fh: 1154;
-  --wx: 5.05; --wy: 6.33; --ww: 88.95; --wh: 73.92;
-  --frame: url("../assets/paper/polaroid-frame-2.webp");
-}
-.polaroid::after {
-  /* the scanned frame sits over the photo; its window is transparent */
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: var(--frame) 0 0 / 100% 100% no-repeat;
-  pointer-events: none;
-}
-.polaroid .pol-photo {
-  position: absolute;
-  /* small bleed past the window so no gap ever shows */
-  left: calc((var(--wx) - 0.35) * 1%);
-  top: calc((var(--wy) - 0.35) * 1%);
-  width: calc((var(--ww) + 0.7) * 1%);
-  height: calc((var(--wh) + 0.7) * 1%);
-  object-fit: cover;
-  z-index: 1;
-  /* emulsion corners: the dye never reaches the window's corner exactly */
-  border-radius: 4px;
-  /* a good print of a good photo: clean, crisp, naturally coloured. the
-     only grade is a hair of exposure and bite so faces read sharp against
-     the frame's white. no sepia, no washed contrast, no desaturation. */
-  filter: brightness(1.05) contrast(1.05) saturate(1.06);
-}
-/* film grain over the emulsion, under the frame. lives on .polaroid rather
-   than inside .pol-gloss because .pol-gloss's z-index makes a stacking
-   context, which would trap mix-blend-mode away from the photo. kept to a
-   whisper: enough that the print is not a flat pasted-in screenshot, far
-   too little to fog the picture. */
-.polaroid::before {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  left: calc(var(--wx) * 1%);
-  top: calc(var(--wy) * 1%);
-  width: calc(var(--ww) * 1%);
-  height: calc(var(--wh) * 1%);
-  pointer-events: none;
-  background: url("../assets/paper/paper-grain.webp") 0 0 / 130px;
-  mix-blend-mode: overlay;
-  opacity: 0.08;
-}
-.pol-gloss {
-  position: absolute;
-  z-index: 3;
-  left: calc(var(--wx) * 1%);
-  top: calc(var(--wy) * 1%);
-  width: calc(var(--ww) * 1%);
-  height: calc(var(--wh) * 1%);
-  pointer-events: none;
-  /* raking sheen on the film, then the window's own edge falloff. both are
-     held back so the sheen never hazes the picture and the falloff stops
-     well short of the faces. */
-  background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.025) 22%, transparent 40%),
-    radial-gradient(88% 84% at 50% 45%, transparent 72%, rgba(58, 44, 26, 0.08) 100%);
-}
-.caden-polaroid .pol-photo { object-position: 50% 10%; }
-.chad-polaroid .pol-photo { object-position: 50% 22%; }
-
-.polaroid figcaption {
-  position: absolute;
-  z-index: 3;
-  left: 8%;
-  right: 8%;
-  top: calc((var(--wy) + var(--wh)) * 1%);
-  bottom: 2.5%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  text-align: center;
-}
-
-/* --- postcards: real scanned card stock ----------------------------- */
-
-.postcard { background: none; }
-.postcard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: var(--stock) center / 100% 100% no-repeat;
-  filter:
-    drop-shadow(0 0 4px rgba(28, 15, 5, 0.5))
-    drop-shadow(1px 2px 2px rgba(25, 12, 4, 0.32))
-    drop-shadow(5px 12px 15px rgba(25, 12, 4, 0.26))
-    drop-shadow(12px 28px 32px rgba(22, 9, 2, 0.3));
-}
-.postcard-front {
-  --stock: url("../assets/paper/postcard-front.webp");
-  width: 800px;
-  aspect-ratio: 1400 / 900;
-}
-.postcard-back {
-  --stock: url("../assets/paper/postcard-back.webp");
-  width: 720px;
-  aspect-ratio: 1400 / 868;
-}
-/* 1913 card stock over 2026 ballpoint: without the stock's own tooth
-   reading back over the writing, the handwriting floats above the
-   engraving instead of sitting in it. masked to the deckled silhouette. */
-.postcard-back::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  pointer-events: none;
-  background: url("../assets/paper/paper-grain.webp") 0 0 / 170px;
-  -webkit-mask: var(--stock) center / 100% 100% no-repeat;
-  mask: var(--stock) center / 100% 100% no-repeat;
-  mix-blend-mode: overlay;
-  opacity: 0.3;
-}
-
-/* picture side: the Level Up shot printed into the card's picture area */
-.pc-picture {
-  position: absolute;
-  left: 2.5%;
-  top: 4.78%;
-  width: 94.57%;
-  height: 90.44%;
-  object-fit: cover;
-  z-index: 1;
-  /* four-colour on uncoated stock: no monitor blacks, no monitor saturation */
-  filter: saturate(0.72) contrast(0.8) brightness(1.05) sepia(0.12);
-}
-.pc-grain {
-  /* the card's print grain over the modern shot, so it reads as printed */
-  position: absolute;
-  left: 2.5%;
-  top: 4.78%;
-  width: 94.57%;
-  height: 90.44%;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    /* faint rosette from the screen the picture was printed through */
-    repeating-radial-gradient(circle at 0 0, rgba(0, 0, 0, 0.1) 0 0.6px, transparent 0.6px 2.4px),
-    url("../assets/paper/paper-grain.webp") 0 0 / 340px;
-  mix-blend-mode: multiply;
-  opacity: 0.3;
-}
-/* ink-density ceiling: paper reflects, so the darkest ink on the card can
-   never reach the monitor black the source screenshot was captured at */
-.postcard-front::after {
-  content: "";
-  position: absolute;
-  left: 2.5%;
-  top: 4.78%;
-  width: 94.57%;
-  height: 90.44%;
-  z-index: 2;
-  pointer-events: none;
-  background: rgba(236, 226, 203, 0.14);
-  mix-blend-mode: screen;
-}
-.pc-caption {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  top: calc(100% - 20px);
-  width: 440px;
-  height: 128px;
-  transform: translateX(-50%) rotate(1.2deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 34px;
-  background: url("../assets/paper/tape-7.webp") center / 100% 100% no-repeat;
-  filter: url(#ink-b) drop-shadow(2px 5px 5px rgba(30, 15, 5, 0.3));
-  font-size: 29px;
-}
-.pc-caption a { text-decoration: none; color: #232019; }
-.pc-caption a:hover { color: var(--red); }
-
-/* address side: the contact card */
-.pc-head {
-  position: absolute;
-  z-index: 3;
-  left: 5.5%;
-  top: 30%;
-  width: 36%;
-  font-size: 40px;
-  line-height: 1.06;
-  font-weight: 700;
-  color: #2b2015;
-}
-.pc-msg {
-  position: absolute;
-  z-index: 3;
-  left: 5.5%;
-  top: 63%;
-  width: 35%;
-  font-size: 24px;
-  line-height: 1.16;
-  color: #2b2015;
-}
-.pc-msg-small {
-  position: absolute;
-  z-index: 3;
-  /* clear of the printed GOLD MEDAL owl device in the card's bottom-left */
-  left: 46%;
-  bottom: 4.5%;
-  font-size: 16.5px;
-  color: #2b2015;
-  opacity: 0.78;
-}
-.pc-stamp {
-  position: absolute;
-  z-index: 2;
-  right: 2.6%;
-  top: 5.5%;
-  width: 15%;
-  height: auto;
-  transform: rotate(2.4deg);
-  filter: sepia(0.1) saturate(0.92) drop-shadow(1px 2px 2px rgba(40, 20, 5, 0.25));
-}
-.pc-addr {
-  position: absolute;
-  /* deliberately no z-index: a stacking context here would isolate the
-     circle's multiply away from the card stock underneath it */
-  left: 46%;
-  top: 47%;
-  width: 49%;
+  color: var(--ink);
   margin: 0;
-  padding: 14px 20px;
-  text-align: center;
 }
-.circle-ink {
-  position: absolute;
-  /* sized to the viewBox's own 340:90, centred on the address: at inset:0
-     the box is too flat, the art fits by height and the loop lands inside
-     the ends of the address instead of round it. scaled up ~1.2x from the
-     viewBox baseline so the loop clears the "c" of caden and the "m" of
-     .com on both sides instead of grazing them. */
-  left: 50%;
-  top: 50%;
-  width: 400px;
-  height: 106px;
-  transform: translate(-50%, -50%);
-  filter: url(#roughen);
-  /* ballpoint over printed stock: the ink darkens what it crosses */
-  mix-blend-mode: multiply;
+
+.meta-end { text-align: right; }
+
+/* --- hero poster -------------------------------------------------- */
+
+.hero {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(0.9rem, 2.4vw, 1.75rem) var(--pad) clamp(1rem, 2.4vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
 }
-.email-link {
-  position: relative;
-  font-size: 29px;
-  font-weight: 600;
-  color: #26201a;
+
+.hero-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  flex-wrap: wrap;
+  padding-bottom: clamp(0.75rem, 1.6vw, 1.1rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-nav ul {
+  display: flex;
+  gap: clamp(0.9rem, 2vw, 2rem);
+}
+
+.hero-nav a {
+  font-family: var(--mono);
+  font-size: clamp(0.62rem, 0.55rem + 0.2vw, 0.75rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   text-decoration: none;
-  white-space: nowrap;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
 }
-.email-link:hover { color: var(--red); }
+.hero-nav a:hover { color: var(--red); border-bottom-color: var(--red); }
 
-/* --- tape: real masking-tape strips --------------------------------- */
-
-.tape {
-  position: absolute;
-  z-index: 4;
-  background: var(--tape) center / 100% 100% no-repeat;
-  filter: drop-shadow(2px 4px 4px rgba(30, 15, 5, 0.28));
-  opacity: 0.96;
-  pointer-events: none;
-}
-.tape-tl2 {
-  --tape: url("../assets/paper/tape-4.webp");
-  width: 126px;
-  height: 124px;
-  top: -52px;
-  left: -48px;
-}
-.tape-tr2 {
-  --tape: url("../assets/paper/tape-3.webp");
-  width: 132px;
-  height: 118px;
-  top: -56px;
-  right: -50px;
-  transform: scaleX(-1);
+.wordmark {
+  margin: auto 0;
+  padding: clamp(1.25rem, 4vw, 3rem) 0 clamp(0.75rem, 2vw, 1.5rem);
+  font-weight: 400;
+  font-size: 1rem;
 }
 
-/* --- reduced motion / no-JS fallback ------------------------------- */
+.wm-line {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--display);
+  font-size: clamp(2.6rem, 17.6vw, 17rem);
+  line-height: 0.86;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.wm-line span { display: block; }
+
+.wm-line + .wm-line {
+  margin-top: clamp(0.5rem, 2.2vw, 2.2rem);
+  justify-content: flex-start;
+  gap: 0.035em;
+}
+
+.hero-statement {
+  max-width: 46ch;
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.35rem);
+  line-height: 1.4;
+  margin-bottom: clamp(2rem, 6vw, 4.5rem);
+}
+
+.mark {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  background: var(--red);
+  margin-right: 0.6em;
+  vertical-align: 0.02em;
+}
+
+.hero-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-top: clamp(0.75rem, 1.6vw, 1.1rem);
+  border-top: 1px solid var(--rule);
+  margin-top: auto;
+}
+
+/* --- section bands ------------------------------------------------ */
+
+.band {
+  border-top: 1px solid var(--ink);
+  padding: clamp(1.1rem, 2.4vw, 1.6rem) var(--pad) clamp(3.5rem, 9vw, 8rem);
+}
+
+.band-label {
+  font-family: var(--mono);
+  font-size: clamp(0.62rem, 0.55rem + 0.2vw, 0.75rem);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: clamp(2rem, 6vw, 5rem);
+}
+
+/* --- about -------------------------------------------------------- */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr);
+  gap: clamp(1.5rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.portrait {
+  margin: 0;
+  max-width: 380px;
+}
+
+.portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+  filter: none;
+}
+
+.portrait .meta {
+  margin-top: 0.6rem;
+}
+
+.about-copy {
+  max-width: 62ch;
+  margin-left: auto;
+  margin-right: clamp(0rem, 6vw, 10rem);
+}
+
+.about-lead {
+  font-size: clamp(1.35rem, 1rem + 2vw, 2.6rem);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+}
+
+.about-copy p + p { max-width: 54ch; }
+
+/* --- services index ----------------------------------------------- */
+
+.index-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1rem clamp(1.5rem, 4vw, 5rem);
+  align-items: baseline;
+  padding: clamp(1.4rem, 3vw, 2.4rem) 0;
+  border-top: 1px solid var(--rule);
+  transition: color 0.12s linear;
+}
+
+.index-row:last-child { border-bottom: 1px solid var(--rule); }
+
+.index-row:hover { color: var(--red); }
+
+.index-name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 1rem + 3.2vw, 4.25rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+}
+
+.index-note {
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+  line-height: 1.5;
+  max-width: 44ch;
+}
+
+/* --- featured work ------------------------------------------------ */
+
+.plate-frame {
+  border: 1px solid var(--ink);
+  padding: clamp(0.4rem, 1vw, 0.85rem);
+  background: var(--paper);
+}
+
+.plate img { width: 100%; }
+
+.plate figcaption {
+  margin-top: clamp(0.6rem, 1.4vw, 1rem);
+  font-family: var(--mono);
+  font-size: clamp(0.62rem, 0.55rem + 0.2vw, 0.75rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.plate figcaption a {
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+}
+.plate figcaption a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+.work-note {
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+}
+
+/* --- testimonial -------------------------------------------------- */
+
+.testimonial {
+  margin: clamp(3rem, 7vw, 6rem) 0 0;
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: clamp(1.25rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.testimonial-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+}
+
+.testimonial-quote {
+  margin: 0;
+  grid-column: 2;
+}
+
+.testimonial-quote p {
+  font-size: clamp(1.35rem, 1rem + 2vw, 2.4rem);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+}
+
+.testimonial-attr {
+  grid-column: 2;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  .testimonial { grid-template-columns: 1fr; }
+  .testimonial-photo { max-width: 180px; }
+  .testimonial-quote, .testimonial-attr { grid-column: 1; }
+}
+
+/* --- contact ------------------------------------------------------ */
+
+.contact-head {
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 0.5rem + 8.2vw, 11rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.002em;
+  max-width: 14ch;
+  margin-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+
+.contact-line {
+  max-width: 48ch;
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+  line-height: 1.45;
+  margin-bottom: clamp(1.5rem, 3.5vw, 2.5rem);
+}
+
+.contact-action { margin-bottom: clamp(1rem, 2vw, 1.5rem); }
+
+.stamp {
+  display: inline-block;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 0.7rem + 0.4vw, 1rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.85em 1.4em;
+}
+.stamp:hover { background: var(--ink); }
+.stamp:focus-visible { outline-color: var(--ink); }
+
+.contact-address { color: var(--muted); }
+
+/* --- footer ------------------------------------------------------- */
+
+.site-footer {
+  border-top: 1px solid var(--ink);
+  padding: clamp(1rem, 2vw, 1.5rem) var(--pad);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* --- small screens ------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .hero-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .hero-top .meta-end { text-align: left; }
+  .hero-nav ul { flex-wrap: wrap; gap: 0.75rem 1.25rem; }
+
+  .hero-bottom { flex-direction: column; align-items: stretch; gap: 0.4rem; }
+  .hero-bottom .meta-end { text-align: left; }
+
+  .index-row { grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
+
+  .about-copy { margin-right: 0; }
+  .about-grid { grid-template-columns: 1fr; }
+  .portrait { max-width: 300px; }
+}
+
+@media (max-width: 420px) {
+  .site-footer { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .site-footer .meta-end { text-align: left; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
